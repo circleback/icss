@@ -14,7 +14,7 @@ describe Icss::ReceiverModel do
     before do
       Icss::Handy.field :rangey,     Integer, :validates => { :inclusion => { :in => 0..9 }}
       Icss::Handy.field :mandatory,  Integer, :validates => { :presence  => true }
-      Icss::Handy.field :patternish, String,  :validates => { :format    => { :with => /eat$/ } }
+      Icss::Handy.field :patternish, String,  :validates => { :format    => { :multiline => true , :with => /eat/}}
     end
     let(:good_smurf){ Icss::Handy.receive(:rangey => 5,  :patternish => 'smurfberry crunch is fun to eat', :mandatory => 1) }
     let(:bad_smurf ){ Icss::Handy.receive(:rangey => 10, :patternish => 'smurfnuggets!') }
@@ -25,11 +25,14 @@ describe Icss::ReceiverModel do
 
     it 'are applied, and fail when bad' do
       bad_smurf.should_not be_valid
-      bad_smurf.errors.should == {
-        :rangey     => ["is not included in the list"],
-        :mandatory  => ["can't be blank"],
-        :patternish => ["is invalid"]
-      }
+      bad_smurf.errors[:rangey].should include("is not included in the list")
+      bad_smurf.errors[:mandatory].should include("can't be blank")
+      bad_smurf.errors[:patternish].should include("is invalid")
+      #bad_smurf.errors.should == {
+      #  :rangey     => ["is not included in the list"],
+      #  :mandatory  => ["can't be blank"],
+      #  :patternish => ["is invalid"]
+      #}
       bad_smurf.rangey = 3 ; bad_smurf.mandatory = 7 ; bad_smurf.patternish = "a very smurfy breakfast treat"
       bad_smurf.should        be_valid
       bad_smurf.errors.should be_empty
@@ -46,7 +49,8 @@ describe Icss::ReceiverModel do
     it ':required => true is sugar for ":validates => { :presence => true }"' do
       Icss::Handy.field :also_mandatory,  Integer, :required => true
       good_smurf.should_not be_valid
-      good_smurf.errors.should == { :also_mandatory  => ["can't be blank"], }
+      good_smurf.errors[:also_mandatory].should include("can't be blank")
+      #good_smurf.errors.should == { :also_mandatory  => ["can't be blank"], }
       good_smurf.also_mandatory = 88
       good_smurf.should be_valid
     end
