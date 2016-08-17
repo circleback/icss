@@ -147,9 +147,13 @@ module Icss
 
         #
         # Expand filenames to full paths using catalog_root, catalog_sections, and provided filename
+        # modded by JD: 8/17/16 to fix ruby 2.2+ issue with circular reference arguments
         #
-        def catalog_filenames(filename='*',catalog_sections=catalog_sections)
-          catalog_sections.collect{ |section|
+        def catalog_filenames(filename='*',catalog_sections_arg=:default)
+
+          catalog_sections_arg = catalog_sections if catalog_sections_arg == :default
+
+          catalog_sections_arg.collect{ |section|
             Dir[File.join(Settings[:catalog_root], section, filename + '.icss.yaml')] }.flatten
         end
 
